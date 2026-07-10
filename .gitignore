@@ -1,0 +1,8 @@
+node_modules/
+dist/
+public/data-public.json
+netlify/functions/data-private.json
+scripts/output/
+.DS_Store
+.env
+.env.*

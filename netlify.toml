@@ -1,0 +1,17 @@
+[build]
+  command = "node scripts/export-tasks.js && npm run build"
+  publish = "dist"
+  functions = "netlify/functions"
+
+[build.environment]
+  NODE_VERSION = "18"
+
+[functions]
+  included_files = ["netlify/functions/data-private.json", "scripts/output/tasks.json"]
+
+# SPA-friendly fallback (không bắt buộc với site 1 trang, nhưng an toàn nếu
+# sau này thêm route con như /projects/:slug)
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="robots" content="noindex, nofollow" />
+<title>Xếp lịch task — Bảng điều khiển</title>
+<style>
+  :root {
+    --bg: #10141c;
+    --panel: #171c26;
+    --panel-2: #1e2430;
+    --border: #2a3140;
+    --text: #e6e9ef;
+    --text-dim: #8b93a3;
+    --accent: #5ce1b8;
+    --accent-dim: #2f4f47;
+    --danger: #ef6f6f;
+    --mono: "JetBrains Mono", "SF Mono", Consolas, monospace;
+    --sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    padding: 40px 20px;
+  }
+
+  .wrap { width: 100%; max-width: 720px; }
+
+  header { margin-bottom: 28px; }
+
+  header .eyebrow {
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 6px;
+  }
+
+  header h1 { font-size: 24px; margin: 0; font-weight: 600; }
+  header p { color: var(--text-dim); font-size: 14px; margin-top: 6px; }
+
+  #gate {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+  }
+
+  #gate label { display: block; font-size: 13px; color: var(--text-dim); margin-bottom: 8px; }
+
+  input[type="password"], input[type="text"], textarea {
+    width: 100%;
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    padding: 12px 14px;
+    font-size: 14px;
+    font-family: var(--sans);
+    outline: none;
+  }
+
+  input:focus, textarea:focus { border-color: var(--accent); }
+
+  button {
+    background: var(--accent);
+    color: #08130f;
+    border: none;
+    border-radius: 8px;
+    padding: 12px 20px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: var(--sans);
+  }
+
+  button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  button.secondary {
+    background: transparent;
+    color: var(--text-dim);
+    border: 1px solid var(--border);
+  }
+
+  .tabs {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 20px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .tab {
+    padding: 10px 16px;
+    font-size: 14px;
+    color: var(--text-dim);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    user-select: none;
+  }
+
+  .tab.active { color: var(--text); border-bottom-color: var(--accent); }
+
+  .panel { display: none; }
+  .panel.active { display: block; }
+
+  .card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+  }
+
+  textarea { min-height: 84px; resize: vertical; margin-bottom: 14px; }
+
+  .row { display: flex; gap: 10px; align-items: center; }
+
+  .hint { font-size: 12px; color: var(--text-dim); margin-top: 10px; line-height: 1.5; }
+
+  .result { margin-top: 20px; }
+
+  .task-item {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 14px;
+    margin-bottom: 8px;
+    font-size: 13px;
+  }
+
+  .task-item .time { font-family: var(--mono); color: var(--accent); font-size: 12px; }
+  .task-item .link { color: var(--accent); text-decoration: none; font-size: 12px; }
+
+  .error-box {
+    background: rgba(239, 111, 111, 0.1);
+    border: 1px solid var(--danger);
+    color: var(--danger);
+    border-radius: 8px;
+    padding: 12px 14px;
+    font-size: 13px;
+    margin-top: 14px;
+  }
+
+  .group { margin-bottom: 22px; }
+
+  .group h3 {
+    font-size: 14px;
+    margin: 0 0 4px 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .badge {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--bg);
+    background: var(--accent);
+    padding: 1px 7px;
+    border-radius: 999px;
+  }
+
+  .group ul { margin: 8px 0 0 0; padding-left: 18px; }
+  .group li { font-size: 13px; color: var(--text); margin-bottom: 4px; }
+
+  .loading { color: var(--text-dim); font-size: 13px; font-family: var(--mono); }
+
+  .refresh-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Project Log · Nội bộ</div>
+    <h1>Xếp lịch task bằng AI</h1>
+    <p>Gõ một câu tiếng Việt, AI tự lọc task và tạo lịch trên Google Calendar.</p>
+  </header>
+
+  <div id="gate">
+    <label for="pw">Mật khẩu</label>
+    <div class="row">
+      <input type="password" id="pw" placeholder="Nhập mật khẩu để tiếp tục" />
+      <button id="unlockBtn">Vào</button>
+    </div>
+    <div class="hint">Mật khẩu chỉ lưu tạm trong phiên trình duyệt này, không lưu lâu dài.</div>
+    <div id="gateError" class="error-box" style="display:none;"></div>
+  </div>
+
+  <div id="app" style="display:none;">
+    <div class="tabs">
+      <div class="tab active" data-tab="schedule">Xếp lịch</div>
+      <div class="tab" data-tab="list">Danh sách task</div>
+    </div>
+
+    <div class="panel active" id="panel-schedule">
+      <div class="card">
+        <label for="command" style="display:block; font-size:13px; color:var(--text-dim); margin-bottom:8px;">
+          Câu lệnh
+        </label>
+        <textarea id="command" placeholder='Ví dụ: lọc task liên quan tới digital garden, đặt vào 10/07/2026 từ 9h-12h'></textarea>
+        <div class="row">
+          <button id="scheduleBtn">Xếp lịch ngay</button>
+          <span id="scheduleStatus" class="loading"></span>
+        </div>
+        <div id="scheduleResult" class="result"></div>
+      </div>
+    </div>
+
+    <div class="panel" id="panel-list">
+      <div class="card">
+        <div class="refresh-row">
+          <span class="loading" id="listStatus"></span>
+          <button class="secondary" id="refreshBtn">Làm mới</button>
+        </div>
+        <div id="listResult"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  let password = sessionStorage.getItem("dashboard_pw") || "";
+
+  const gate = document.getElementById("gate");
+  const app = document.getElementById("app");
+  const pwInput = document.getElementById("pw");
+  const gateError = document.getElementById("gateError");
+
+  function showApp() {
+    gate.style.display = "none";
+    app.style.display = "block";
+    loadTasks();
+  }
+
+  async function tryUnlock(pw) {
+    const res = await fetch("/.netlify/functions/list-tasks", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ password: pw }),
+    });
+    if (res.status === 401) return false;
+    password = pw;
+    sessionStorage.setItem("dashboard_pw", pw);
+    return true;
+  }
+
+  document.getElementById("unlockBtn").addEventListener("click", async () => {
+    const pw = pwInput.value.trim();
+    if (!pw) return;
+    gateError.style.display = "none";
+    const ok = await tryUnlock(pw);
+    if (ok) {
+      showApp();
+    } else {
+      gateError.textContent = "Sai mật khẩu, thử lại.";
+      gateError.style.display = "block";
+    }
+  });
+
+  pwInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") document.getElementById("unlockBtn").click();
+  });
+
+  if (password) {
+    tryUnlock(password).then((ok) => { if (ok) showApp(); });
+  }
+
+  document.querySelectorAll(".tab").forEach((tab) => {
+    tab.addEventListener("click", () => {
+      document.querySelectorAll(".tab").forEach((t) => t.classList.remove("active"));
+      document.querySelectorAll(".panel").forEach((p) => p.classList.remove("active"));
+      tab.classList.add("active");
+      document.getElementById("panel-" + tab.dataset.tab).classList.add("active");
+      if (tab.dataset.tab === "list") loadTasks();
+    });
+  });
+
+  document.getElementById("scheduleBtn").addEventListener("click", async () => {
+    const command = document.getElementById("command").value.trim();
+    const statusEl = document.getElementById("scheduleStatus");
+    const resultEl = document.getElementById("scheduleResult");
+    const btn = document.getElementById("scheduleBtn");
+
+    if (!command) return;
+
+    btn.disabled = true;
+    statusEl.textContent = "Đang xử lý… (có thể mất 10-20 giây)";
+    resultEl.innerHTML = "";
+
+    try {
+      const res = await fetch("/.netlify/functions/schedule-tasks", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password, command }),
+      });
+      const data = await res.json();
+      statusEl.textContent = "";
+      btn.disabled = false;
+
+      if (!data.ok) {
+        resultEl.innerHTML = `<div class="error-box">${escapeHtml(data.error || "Lỗi không rõ.")}</div>`;
+        return;
+      }
+
+      if (!data.created || data.created.length === 0) {
+        resultEl.innerHTML = `<div class="hint">${escapeHtml(data.message || "Không có task nào khớp yêu cầu.")}</div>`;
+        return;
+      }
+
+      let html = "";
+      for (const item of data.created) {
+        html += `<div class="task-item">
+          <div class="time">${item.start} → ${item.end}</div>
+          <div>${escapeHtml(item.task)} <span style="color:var(--text-dim)">(${escapeHtml(item.project)})</span></div>
+          <a class="link" href="${item.htmlLink}" target="_blank">Xem trên Google Calendar →</a>
+        </div>`;
+      }
+      if (data.errors && data.errors.length) {
+        for (const e of data.errors) {
+          html += `<div class="error-box">Lỗi task "${escapeHtml(e.task)}": ${escapeHtml(e.error)}</div>`;
+        }
+      }
+      resultEl.innerHTML = html;
+    } catch (err) {
+      statusEl.textContent = "";
+      btn.disabled = false;
+      resultEl.innerHTML = `<div class="error-box">Lỗi kết nối: ${escapeHtml(err.message)}</div>`;
+    }
+  });
+
+  document.getElementById("refreshBtn").addEventListener("click", loadTasks);
+
+  async function loadTasks() {
+    const statusEl = document.getElementById("listStatus");
+    const resultEl = document.getElementById("listResult");
+    statusEl.textContent = "Đang tải…";
+    resultEl.innerHTML = "";
+
+    try {
+      const res = await fetch("/.netlify/functions/list-tasks", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password }),
+      });
+      const data = await res.json();
+
+      if (!data.ok) {
+        statusEl.textContent = "";
+        resultEl.innerHTML = `<div class="error-box">${escapeHtml(data.error || "Lỗi không rõ.")}</div>`;
+        return;
+      }
+
+      statusEl.textContent = `Tổng ${data.total} task, ${data.groups.length} project`;
+
+      if (data.groups.length === 0) {
+        resultEl.innerHTML = `<div class="hint">Không có task nào đang chờ.</div>`;
+        return;
+      }
+
+      let html = "";
+      for (const g of data.groups) {
+        html += `<div class="group">
+          <h3>${escapeHtml(g.project)} ${g.priority != null ? `<span class="badge">P${g.priority}</span>` : ""}</h3>
+          <ul>${g.tasks.map((t) => `<li>${escapeHtml(t)}</li>`).join("")}</ul>
+        </div>`;
+      }
+      resultEl.innerHTML = html;
+    } catch (err) {
+      statusEl.textContent = "";
+      resultEl.innerHTML = `<div class="error-box">Lỗi kết nối: ${escapeHtml(err.message)}</div>`;
+    }
+  }
+
+  function escapeHtml(str) {
+    const div = document.createElement("div");
+    div.textContent = str ?? "";
+    return div.innerHTML;
+  }
+</script>
+</body>
+</html>

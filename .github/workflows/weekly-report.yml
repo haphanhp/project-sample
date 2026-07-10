@@ -1,0 +1,35 @@
+name: Weekly strategy report → Telegram
+
+# Chạy tự động mỗi sáng thứ 2, 7:00 giờ Việt Nam (= 00:00 UTC).
+# Cũng cho phép bấm chạy tay từ tab Actions trên GitHub (workflow_dispatch)
+# để test mà không cần đợi đúng lịch.
+on:
+  schedule:
+    - cron: "0 0 * * 1"
+  workflow_dispatch:
+
+jobs:
+  send-report:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Cài dependencies
+        run: npm ci
+
+      - name: Build dữ liệu (sinh data-private.json từ projects/+actions/)
+        run: node scripts/build-data.js
+
+      - name: Sinh + gửi báo cáo tuần qua Telegram
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          node scripts/weekly-report.js
+          node scripts/send-weekly-report.js

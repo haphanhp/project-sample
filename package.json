@@ -1,0 +1,18 @@
+{
+  "name": "project-log-sample",
+  "version": "1.0.0",
+  "description": "Markdown-driven personal project dashboard: checklists, completion %, git activity heatmap, AI task scheduling, weekly reports.",
+  "type": "module",
+  "scripts": {
+    "data": "node scripts/build-data.js",
+    "dev": "npm run data && vite",
+    "build": "npm run data && vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "vite": "^5.4.0"
+  },
+  "dependencies": {
+    "gray-matter": "^4.0.3"
+  }
+}
