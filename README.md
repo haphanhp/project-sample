@@ -169,6 +169,7 @@ public/
 .github/workflows/
 └── weekly-report.yml         # cron for the weekly Telegram report
 sop-frontmatter-project-repo.md  # full frontmatter field reference
+CONTEXT.md                    # architecture overview + known technical pitfalls
 netlify.toml                 # build command, publish dir, redirects
 ```
 
